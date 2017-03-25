@@ -41,6 +41,7 @@ WHERE {
                (pc:mainObject       skos:related    1                                    {{qualifier-inhibition.out}})
                (pc:additionalObject skos:closeMatch {{additional-object-inhibition.out}} 1)
                (pc:additionalObject skos:related    {{additional-object-inhibition.out}} {{qualifier-inhibition.out}})
+        }
         ?contract ?cpvProperty [ ?matchProperty ?cpvObject ] ;
           pc:lot/pc:awardedTender/pc:bidder ?match . 
       }
