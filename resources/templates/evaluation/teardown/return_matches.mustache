@@ -1,0 +1,25 @@
+{{!
+@param IRI graph
+@param IRI evaluation-graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+DELETE {
+  GRAPH <{{evaluation-graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder .
+  }
+}
+INSERT {
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder .
+  }
+}
+WHERE {
+  GRAPH <{{evaluation-graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder .
+  }
+}

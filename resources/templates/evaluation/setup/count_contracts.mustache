@@ -1,0 +1,12 @@
+{{!
+@param IRI graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT (COUNT(DISTINCT ?contract) AS ?count)
+WHERE {
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender/pc:bidder [] .
+  }
+}

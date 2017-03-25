@@ -1,0 +1,43 @@
+{{!
+@param IRI   graph
+@param IRI   evaluation-graph
+@param int   limit
+@param int   offset
+}}
+
+{{> templates/prefixes.mustache}}
+
+DELETE {
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder . 
+  }
+}
+INSERT {
+  GRAPH <{{evaluation-graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder . 
+  }
+}
+WHERE {
+  {
+    SELECT ?contract
+    WHERE {
+      {
+        SELECT DISTINCT ?contract 
+        WHERE {
+          GRAPH <{{graph}}> {
+            ?contract pc:awardedTender/pc:bidder [] . 
+          }
+        }
+        ORDER BY ?contract
+      }
+    }
+    LIMIT {{limit}}
+    OFFSET {{offset}}
+  }
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder .
+  }
+}

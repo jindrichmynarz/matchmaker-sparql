@@ -1,0 +1,16 @@
+{{!
+@param IRI graph
+@param int limit
+@param int offset
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT DISTINCT ?bidder 
+WHERE {
+  GRAPH <{{graph}}> {
+    [] pc:bidder ?bidder .
+  }
+}
+LIMIT {{limit}}
+OFFSET {{offset}}

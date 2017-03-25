@@ -1,0 +1,23 @@
+{{!
+@param IRI graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+WITH <{{graph}}>
+DELETE {
+  ?contract pc:awardedTender ?tender .
+  ?tender pc:bidder ?bidder .
+}
+WHERE {
+  {
+    SELECT ?contract
+    WHERE {
+      ?contract pc:awardedTender/pc:bidder ?bidder .
+    }
+    GROUP BY ?contract
+    HAVING (COUNT(DISTINCT ?bidder) > 1)
+  }
+  ?contract pc:awardedTender ?tender .
+  ?tender pc:bidder ?bidder .
+}

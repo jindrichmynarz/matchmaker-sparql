@@ -1,0 +1,14 @@
+{{!
+@param IRI graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT DISTINCT ?contract
+WHERE {
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender/pc:bidder [] .
+  }
+}
+ORDER BY RAND()
+LIMIT 1

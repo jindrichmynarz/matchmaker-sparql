@@ -1,0 +1,11 @@
+{{!
+@param map additional-object-inhibition
+@param map main-object-inhibition
+}}
+
+VALUES (?objectProperty     ?inScoreModifier                     ?linkProperty   ?linkScoreModifier) {
+       (pc:mainObject       {{main-object-inhibition.in}}        skos:closeMatch 1)
+       (pc:mainObject       {{main-object-inhibition.in}}        skos:related    0.1)
+       (pc:additionalObject {{additional-object-inhibition.in}}  skos:closeMatch 1)
+       (pc:additionalObject {{additional-object-inhibition.in}}  skos:related    0.1)
+}

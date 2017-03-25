@@ -1,0 +1,8 @@
+PREFIX pc: <http://purl.org/procurement/public-contracts#>
+
+SELECT (COUNT(*) AS ?count)
+WHERE {
+  GRAPH <http://linked.opendata.cz/resource/dataset/isvz.cz> {
+    [] pc:awardedTender/pc:bidder [] .
+  }
+}

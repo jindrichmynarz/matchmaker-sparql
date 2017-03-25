@@ -1,0 +1,25 @@
+{{!
+@param IRI source-graph
+@param int limit
+@param int offset (optional)
+}}
+
+        }
+        GROUP BY ?match ?inScoreModifier ?outScoreModifier
+      }
+    }
+    GROUP BY ?match
+    ORDER BY DESC(?score)
+    LIMIT {{limit}}
+    {{#offset}}
+    OFFSET {{offset}}
+    {{/offset}}
+  }
+  GRAPH <{{source-graph}}> {
+    {{> templates/matchmaker/sparql/partials/business_entity_legal_names.mustache}}
+    OPTIONAL {
+      ?match ?businessEntityLegalName ?_label .
+    }
+  }
+}
+GROUP BY ?match ?score

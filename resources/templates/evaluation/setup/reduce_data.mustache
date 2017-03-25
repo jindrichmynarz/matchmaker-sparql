@@ -1,0 +1,37 @@
+{{!
+@param IRI   graph
+@param IRI   withheld-graph
+@param int   limit
+@param int   offset
+}}
+
+{{> templates/prefixes.mustache}}
+
+DELETE {
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+  }
+}
+INSERT {
+  GRAPH <{{withheld-graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+  }
+}
+WHERE {
+  {
+    SELECT ?contract ?awardedTender
+    WHERE {
+      {
+        SELECT ?contract ?awardedTender 
+        WHERE {
+          GRAPH <{{graph}}> {
+            ?contract pc:awardedTender ?awardedTender .
+          }
+        }
+        ORDER BY ASC(?contract)
+      }
+    }
+    OFFSET {{offset}}
+    LIMIT {{limit}}
+  }
+}

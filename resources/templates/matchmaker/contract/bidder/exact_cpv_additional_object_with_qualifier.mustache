@@ -1,0 +1,57 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param map additional-object-inhibition
+@param map qualifier-inhibition
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match
+       (SUM(?inScoreModifierProperty * ?inScoreModifierQualifier *
+            ?outScoreModifierProperty * ?outScoreModifierQualifier *
+            ?contractCount) AS ?score) 
+WHERE {
+  {
+    SELECT ?match
+           ?inScoreModifierProperty ?inScoreModifierQualifier 
+           ?outScoreModifierProperty ?outScoreModifierQualifier
+           (COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject ?inScoreModifierProperty ?inScoreModifierQualifier
+        WHERE {
+          GRAPH <{{graph}}> {
+            VALUES (?cpvProperty        ?matchProperty  ?inScoreModifierProperty ?inScoreModifierQualifier) {
+                   (pc:mainObject       skos:closeMatch 1                        1)
+                   (pc:mainObject       skos:related    1                        {{qualifier-inhibition.in}})
+                   (pc:additionalObject skos:closeMatch {{additional-object-inhibition.in}}                        1)
+                   (pc:additionalObject skos:related    {{additional-object-inhibition.in}}                        {{qualifier-inhibition.in}})
+            }
+            [] pc:lot <{{contract}}> ;
+              ?cpvProperty [ ?matchProperty ?cpvObject ] .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        VALUES (?cpvProperty        ?matchProperty  ?outScoreModifierProperty            ?outScoreModifierQualifier) {
+               (pc:mainObject       skos:closeMatch 1                                    1)
+               (pc:mainObject       skos:related    1                                    {{qualifier-inhibition.out}})
+               (pc:additionalObject skos:closeMatch {{additional-object-inhibition.out}} 1)
+               (pc:additionalObject skos:related    {{additional-object-inhibition.out}} {{qualifier-inhibition.out}})
+        ?contract ?cpvProperty [ ?matchProperty ?cpvObject ] ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?inScoreModifierProperty ?inScoreModifierQualifier
+             ?outScoreModifierProperty ?outScoreModifierQualifier
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}

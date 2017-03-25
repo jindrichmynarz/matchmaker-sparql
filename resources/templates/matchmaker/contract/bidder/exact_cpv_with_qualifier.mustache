@@ -1,0 +1,46 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param map qualifier-inhibition
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?inScoreModifier * ?outScoreModifier * ?contractCount) AS ?score) 
+WHERE {
+  {
+    SELECT ?match ?inScoreModifier ?outScoreModifier (COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject ?inScoreModifier
+        WHERE {
+          GRAPH <{{graph}}> {
+            VALUES (?matchProperty  ?inScoreModifier) {
+                   (skos:closeMatch 1)
+                   (skos:related    {{qualifier-inhibition.in}})
+            }
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject [ ?matchProperty ?cpvObject ] .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        VALUES (?matchProperty  ?outScoreModifier) {
+               (skos:closeMatch 1)
+               (skos:related    {{qualifier-inhibition.out}})
+        }
+        ?contract pc:mainObject [ ?matchProperty ?cpvObject ] ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?inScoreModifier ?outScoreModifier
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}

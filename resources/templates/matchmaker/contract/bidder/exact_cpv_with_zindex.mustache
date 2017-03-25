@@ -1,0 +1,48 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match
+       (SUM(?contractCount * ?zIndex) AS ?score) 
+WHERE {
+  {
+    SELECT ?match
+           (COUNT(?contract) AS ?contractCount)
+           (SAMPLE(?__zIndex) AS ?zIndex)
+    WHERE {
+      {
+        SELECT ?cpvObject
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+          pc:lot/pc:awardedTender/pc:bidder ?match ;
+          pc:contractingAuthority ?contractingAuthority .
+      }
+      OPTIONAL {
+        GRAPH <http://linked.opendata.cz/resource/zindex.cz/dataset> {
+          [] dimension:organization ?contractingAuthority ;
+            measure:zIndex ?_zIndex .
+        }
+      }
+      BIND (COALESCE(?_zindex, 0.5) AS ?__zindex)
+    }
+    GROUP BY ?match ?contractingAuthority
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
