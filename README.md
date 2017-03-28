@@ -1,6 +1,6 @@
 # matchmaker-sparql
 
-A SPARQL-based matchmaker for matching public contracts to bidders. It expects data to be described by the [Public Contracts Ontology](http://purl.org/procurement/public-contracts#).
+A SPARQL-based matchmaker for matching public contracts to bidders. It expects data to be described by the [Public Contracts Ontology](http://purl.org/procurement/public-contracts#). This matchmaker is a streamlined reimplementation of the previously developed [matchmaker](https://github.com/opendatacz/matchmaker).
 
 ## Usage
 
