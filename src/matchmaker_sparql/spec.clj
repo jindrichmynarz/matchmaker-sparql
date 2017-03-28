@@ -42,6 +42,9 @@
                 :exact-cpv-with-zindex
                 :exact-cpv-only-open-procedure
                 :expand-to-broader-cpv
+                :expand-to-broader-cpv-with-idf
+                :expand-to-narrower-cpv
+                :expand-to-narrower-cpv-with-idf
                 :kind
                 :service-category
                 :top-page-rank-bidders
