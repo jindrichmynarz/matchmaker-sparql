@@ -1,39 +1,31 @@
 {{!
 @param IRI contract
-@param IRI matched-resource-graph
-@param IRI source-graph
-@param map additional-object-inhibition
-@param map main-object-inhibition
+@param IRI graph
 @param int limit
 @param int offset (optional)
+
+There's no point in computing maximum score for each ?match, since all scores are equal to 1.
 }}
 
 {{> templates/prefixes.mustache}}
 
-SELECT ?match (SAMPLE(?_label) AS ?label) ?score
+SELECT DISTINCT ?match
 WHERE {
   {
-    SELECT ?match (MAX(?contractScore) AS ?score) 
+    SELECT ?cpvObject
     WHERE {
-      {
-        SELECT ?match
-               (IF(?inScoreModifier < ?outScoreModifier, ?inScoreModifier, ?outScoreModifier) AS ?contractScore)
-        WHERE {
-          {
-            SELECT ?cpvObject ?inScoreModifier 
-            WHERE {
-              GRAPH <{{matched-resource-graph}}> {
-                {{> templates/matchmaker/sparql/partials/object_property_inscore.mustache}}
-                <{{contract}}> ?objectProperty ?cpvObject .
-              }
-            }
-          }
-          GRAPH <{{source-graph}}> {
-            {{> templates/matchmaker/sparql/partials/object_property_outscore.mustache}}
-            ?contract pc:awardedTender [
-                pc:bidder ?match
-              ] ;
-              ?objectProperty ?cpvObject .
-          }
-
-{{> templates/matchmaker/sparql/contract/to/business_entity/partials/cpv_query_tail.mustache}}
+      GRAPH <{{graph}}> {
+        [] pc:lot <{{contract}}> ;
+          pc:mainObject/skos:closeMatch ?cpvObject .
+      }
+    }
+  }
+  GRAPH <{{graph}}> {
+    ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+      pc:lot/pc:awardedTender/pc:bidder ?match . 
+  }
+}
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}

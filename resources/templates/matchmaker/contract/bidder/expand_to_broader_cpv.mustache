@@ -1,47 +1,49 @@
 {{!
-@param IRI contract
-@param IRI matched-resource-graph
-@param IRI source-graph
-@param IRI cpv-graph
-@param map additional-object-inhibition
-@param map main-object-inhibition
-@param map query-expansion
-@param int limit
-@param int offset (optional)
+@param IRI   contract
+@param IRI   graph
+@param float inferred-object-inhibition
+@param map   query-expansion
+@param int   limit
+@param int   offset (optional)
 }}
 
-{{> templates/matchmaker/sparql/contract/to/business_entity/partials/cpv_query_head.mustache}}
+{{> templates/prefixes.mustache}}
 
-{
-  SELECT ?cpv ?inScoreModifier 
-  WHERE {
-    {
-      SELECT ?cpv ?inScoreModifier
-      WHERE {
-        GRAPH <{{matched-resource-graph}}> {
-          {{> templates/matchmaker/sparql/partials/object_property_inscore.mustache}}
-          <{{contract}}> ?objectProperty ?cpv .
+SELECT ?match (SUM(?inScoreModifier) AS ?score)
+WHERE {
+  {
+    SELECT ?cpv ?inScoreModifier 
+    WHERE {
+      {
+        SELECT ?cpvObject (1 AS ?inScoreModifier) 
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
         }
-      }
-    } UNION {
-      SELECT ?cpv ({{inferred-object-inhibition}} AS ?inScoreModifier)
-      WHERE {
-        GRAPH <{{matched-resource-graph}}> {
-          <{{contract}}> pc:mainObject ?_cpv .
-        }
-        GRAPH <{{cpv-graph}}> {
-          ?_cpv skos:broaderTransitive{1,{{query-expansion.hops-to-broader}}} ?cpv .
+      } UNION {
+        SELECT ?cpvObject ({{inferred-object-inhibition}} AS ?inScoreModifier)
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?_cpvObject .
+          }
+          GRAPH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008> {
+            ?_cpvObject skos:broaderTransitive{1,{{query-expansion.hops-to-broader}}} ?cpvObject .
+          }
         }
       }
     }
   }
+  GRAPH <{{graph}}> {
+    ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+      pc:lot/pc:awardedTender/pc:bidder ?match . 
+  }
 }
-GRAPH <{{source-graph}}> {
-  {{> templates/matchmaker/sparql/partials/object_property_outscore.mustache}}
-  ?contract pc:awardedTender [
-      pc:bidder ?match
-    ] ;
-    ?objectProperty ?cpv .
-}
-      
-{{> templates/matchmaker/sparql/contract/to/business_entity/partials/cpv_query_tail.mustache}}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}

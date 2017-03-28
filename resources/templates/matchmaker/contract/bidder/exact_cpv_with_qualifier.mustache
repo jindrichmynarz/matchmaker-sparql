@@ -35,7 +35,7 @@ WHERE {
           pc:lot/pc:awardedTender/pc:bidder ?match . 
       }
     }
-    GROUP BY ?match ?inScoreModifier ?outScoreModifier
+    GROUP BY ?match ?cpvObject ?inScoreModifier ?outScoreModifier
   }
 }
 GROUP BY ?match

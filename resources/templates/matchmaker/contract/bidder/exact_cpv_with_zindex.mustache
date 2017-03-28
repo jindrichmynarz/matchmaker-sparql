@@ -14,34 +14,32 @@ WHERE {
     SELECT ?match ?contractCount (COALESCE(?_zIndex, 0.5) AS ?zIndex)
     WHERE {
       {
-        {
-          SELECT ?match
-                 (COUNT(?contract) AS ?contractCount)
-                 (SAMPLE(?__zIndex) AS ?_zIndex)
-          WHERE {
-            {
-              SELECT ?cpvObject
-              WHERE {
-                GRAPH <{{graph}}> {
-                  [] pc:lot <{{contract}}> ;
-                    pc:mainObject/skos:closeMatch ?cpvObject .
-                }
-              }
-            }
-            GRAPH <{{graph}}> {
-              ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
-                pc:lot/pc:awardedTender/pc:bidder ?match ;
-                pc:contractingAuthority ?contractingAuthority .
-            }
-            OPTIONAL {
-              GRAPH <http://linked.opendata.cz/resource/zindex.cz/dataset> {
-                [] dimension:organization ?contractingAuthority ;
-                  measure:zIndex ?__zIndex .
+        SELECT ?match
+               (COUNT(?contract) AS ?contractCount)
+               (SAMPLE(?__zIndex) AS ?_zIndex)
+        WHERE {
+          {
+            SELECT ?cpvObject
+            WHERE {
+              GRAPH <{{graph}}> {
+                [] pc:lot <{{contract}}> ;
+                  pc:mainObject/skos:closeMatch ?cpvObject .
               }
             }
           }
-          GROUP BY ?match ?contractingAuthority
+          GRAPH <{{graph}}> {
+            ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+              pc:lot/pc:awardedTender/pc:bidder ?match ;
+              pc:contractingAuthority ?contractingAuthority .
+          }
+          OPTIONAL {
+            GRAPH <http://linked.opendata.cz/resource/zindex.cz/dataset> {
+              [] dimension:organization ?contractingAuthority ;
+                measure:zIndex ?__zIndex .
+            }
+          }
         }
+        GROUP BY ?match ?cpvObject ?contractingAuthority
       }
     }
   }
