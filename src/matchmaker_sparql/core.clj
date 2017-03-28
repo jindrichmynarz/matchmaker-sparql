@@ -11,7 +11,17 @@
   [kind]
   (str "templates/matchmaker/contract/bidder/" (string/replace (name kind) #"-" "_")))
 
+(defn- match-contract'
+  "Match `contract` to bidders using a `template` rendered with `data`."
+  [query]
+  (map :match (sparql/select-query endpoint query)))
+
+(def match-contract-memoized
+  (memoize match-contract'))
+
 (defn match-contract
+  "Match `contract` to bidders.
+  Potentially retries if it encounters HTTP 404."
   [contract & {:keys [retries]
                :or {retries 0}}]
   (let [{{:keys [kind]
@@ -22,8 +32,9 @@
         template (kind->template kind)
         data (assoc params
                     :graph graph
-                    :contract contract)]
-    (try+ (map :match (sparql/select-template endpoint template data))
+                    :contract contract)
+        query (stencil/render-file template data)]
+    (try+ (match-contract-memoized query)
           ; Virtuoso tends to throw HTTP 404 if under load, so we retry.
           (catch [:type ::sparql/endpoint-not-found] exception
             (if (< retries max-retries)
