@@ -12,6 +12,10 @@ lein run - --config config.edn
 
 The configuration must be serialized using [EDN](https://github.com/edn-format/edn).
 
+## Data preparation
+
+The matchmaker expects [Common Procurement Vocabulary](https://github.com/opendatacz/cpv2rdf) (CPV) to be in the named graph `<http://linked.opendata.cz/resource/concept-scheme/cpv-2008>`. Some matchmakers, such as those using query expansion, use inverse document frequencies (IDF) of CPV concepts. These IDFs can be produced by running SPARQL Update operations in `/resources/data_preparation`.
+
 ## License
 
 Copyright © 2017 Jindřich Mynarz
