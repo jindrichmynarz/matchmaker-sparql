@@ -1,5 +1,5 @@
-PREFIX ex:   <http://example.com/>
-PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+PREFIX ex:  <http://example.com/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 WITH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008/idf>
 DELETE {
