@@ -35,10 +35,17 @@
 (s/def ::inferred-object-inhibition ::weight)
 
 (s/def ::kind #{:exact-cpv
+                :exact-cpv-goedel
                 :exact-cpv-additional-object
                 :exact-cpv-with-qualifier
                 :exact-cpv-additional-object-with-qualifier
-                :exact-cpv-with-zindex})
+                :exact-cpv-with-zindex
+                :exact-cpv-only-open-procedure
+                :expand-to-broader-cpv
+                :kind
+                :service-category
+                :top-page-rank-bidders
+                :top-winning-bidders})
 
 (s/def ::limit ::positive-int)
 
