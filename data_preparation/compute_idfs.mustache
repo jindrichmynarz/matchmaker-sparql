@@ -1,0 +1,51 @@
+{{!
+@param int limit
+@param int offset
+}}
+
+PREFIX ex:   <http://example.com/>
+PREFIX pc:   <http://purl.org/procurement/public-contracts#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+INSERT {
+  GRAPH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008/idf> {
+    ?cpv ex:idf ?idf .
+  }
+}
+WHERE {
+  {
+    SELECT ?cpv (bif:log10(?n/(1.0 + COUNT(?contract))) AS ?idf)
+    WHERE {
+      {
+        SELECT (COUNT(DISTINCT ?contract) AS ?n)
+        WHERE {
+          GRAPH <http://linked.opendata.cz/resource/dataset/isvz.cz> {
+            ?contract (pc:mainObject|pc:additionalObject)/skos:closeMatch ?cpv .
+          }
+        }
+      }
+      {
+        SELECT ?cpv
+        WHERE {
+          {
+            SELECT ?cpv
+            WHERE {
+              GRAPH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008> {
+                ?cpv skos:inScheme <http://linked.opendata.cz/resource/concept-scheme/cpv-2008> .
+              }
+            }
+            ORDER BY ?cpv
+          }
+        }
+        LIMIT {{limit}}
+        OFFSET {{offset}}
+      }
+      OPTIONAL {
+        GRAPH <http://linked.opendata.cz/resource/dataset/isvz.cz> {
+          ?contract (pc:mainObject|pc:additionalObject)/skos:closeMatch ?cpv .
+        }
+      }
+    }
+    GROUP BY ?cpv ?n
+  }
+}
