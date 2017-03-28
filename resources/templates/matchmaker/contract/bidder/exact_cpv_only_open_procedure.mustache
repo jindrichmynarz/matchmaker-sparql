@@ -1,0 +1,38 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?contractCount) AS ?score) 
+WHERE {
+  {
+    SELECT ?match (COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+          pc:procedureType proctypes:Open ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?cpvObject
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
