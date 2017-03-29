@@ -35,6 +35,7 @@
 (s/def ::inferred-object-inhibition ::weight)
 
 (s/def ::kind #{:exact-cpv
+                :exact-cpv-and-nace
                 :exact-cpv-goedel
                 :exact-cpv-additional-object
                 :exact-cpv-with-qualifier
@@ -46,6 +47,7 @@
                 :expand-to-narrower-cpv
                 :expand-to-narrower-cpv-with-idf
                 :kind
+                :random
                 :service-category
                 :top-page-rank-bidders
                 :top-winning-bidders})

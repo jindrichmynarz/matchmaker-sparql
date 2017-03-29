@@ -1,0 +1,21 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT DISTINCT ?match
+WHERE {
+  # {{contract}} {{! A hack to prevent caching. }}
+  GRAPH <{{graph}}> {
+    [] pc:bidder ?match . 
+  }
+}
+ORDER BY RAND()
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
