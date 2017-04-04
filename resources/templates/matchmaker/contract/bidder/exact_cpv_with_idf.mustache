@@ -1,0 +1,40 @@
+{{!
+@param IRI contract
+@param IRI graph
+@param int limit
+@param int offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?contractCount * ?idf) AS ?score) 
+WHERE {
+  {
+    SELECT ?match ?idf (COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject ?idf
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
+          GRAPH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008/idf> {
+            ?cpvObject ex:idf ?idf .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?idf
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
