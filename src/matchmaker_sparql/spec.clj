@@ -41,6 +41,7 @@
                 :exact-cpv-with-qualifier
                 :exact-cpv-additional-object-with-qualifier
                 :exact-cpv-with-zindex
+                :exact-cpv-with-idf
                 :exact-cpv-only-open-procedure
                 :expand-to-broader-cpv
                 :expand-to-broader-cpv-with-idf
