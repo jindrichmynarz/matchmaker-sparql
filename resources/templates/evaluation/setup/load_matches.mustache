@@ -15,7 +15,7 @@ WHERE {
         ?resource pc:awardedTender/pc:bidder ?match .
       }
     }
-    ORDER BY SHA1(?resource) {{! FIXME: Is there an implicit temporal order in resource IRIs? }}
+    ORDER BY ?resource
   }
 }
 LIMIT {{limit}}
