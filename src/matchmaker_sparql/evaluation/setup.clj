@@ -80,11 +80,6 @@
         first
         :count)))
 
-(comment
-  (let [{{:keys [graph]} :data} config]
-    (println (stencil/render-file "templates/evaluation/setup/count_contracts" {:graph graph}))
-    #_(sparql/select-query endpoint )))
-
 (defn count-awarded-contracts
   []
   (count-query "templates/evaluation/setup/count_contracts"))
