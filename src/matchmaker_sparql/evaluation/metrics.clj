@@ -1,5 +1,6 @@
 (ns matchmaker-sparql.evaluation.metrics
-  (:require [clojure.set :refer [union]]))
+  (:require [clojure.set :refer [union]]
+            [taoensso.timbre :as timbre]))
 
 (defn compute-metrics
   "Compute metrics of `matches` given correct `match`."
@@ -18,7 +19,7 @@
   "Compute aggregate metrics for an evaluation fold."
   [metrics]
   {:matches (union-matches metrics)
-   :empty? (sequence (map :empty?) metrics) ; FIXME: Needless double iteration.
+   :empties (sequence (map :empty?) metrics) ; FIXME: Needless double iteration.
    :ranks (sequence (map :rank) metrics)})
 
 (defn aggregate-evaluation-metrics
@@ -28,6 +29,6 @@
   (let [matches (union-matches metrics)]
     {:catalog-coverage (double (/ (count matches)
                                   bidder-count))
-     :prediction-coverage (double (/ (count (filter false? (mapcat :empty? metrics)))
+     :prediction-coverage (double (/ (count (filter false? (mapcat :empties metrics)))
                                      contract-count))
      :ranks (mapcat :ranks metrics)}))
