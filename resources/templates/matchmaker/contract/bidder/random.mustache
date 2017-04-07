@@ -11,7 +11,7 @@ SELECT DISTINCT ?match
 WHERE {
   # {{contract}} {{! A hack to prevent caching. }}
   GRAPH <{{graph}}> {
-    [] pc:bidder ?match . 
+    [] pc:awardedTender/pc:bidder ?match .
   }
 }
 ORDER BY RAND()
