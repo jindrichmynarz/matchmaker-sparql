@@ -51,7 +51,8 @@
                 :random
                 :service-category
                 :top-page-rank-bidders
-                :top-winning-bidders})
+                :top-winning-bidders
+                :additional-object})
 
 (s/def ::limit ::positive-int)
 
