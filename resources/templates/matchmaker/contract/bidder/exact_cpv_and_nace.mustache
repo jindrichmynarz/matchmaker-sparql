@@ -35,7 +35,7 @@ WHERE {
         }
         GRAPH <http://linked.opendata.cz/resource/dataset/ares/res> { 
           ?proxy rov:orgActivity/^rov:orgActivity ?match .
-          BIND ({{inferred-object-inhibition.in}} AS ?inScoreModifier)
+          BIND ({{inferred-object-inhibition}} AS ?inScoreModifier)
         }
       }
     }
