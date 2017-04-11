@@ -1,0 +1,53 @@
+{{!
+@param IRI   contract
+@param IRI   graph
+@param float inferred-object-inhibition
+@param map   query-expansion
+@param int   limit
+@param int   offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?inScoreModifier) AS ?score)
+WHERE {
+  {
+    SELECT ?cpvObject ?inScoreModifier 
+    WHERE {
+      {
+        SELECT ?cpvObject (1 AS ?inScoreModifier) 
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
+        }
+      } UNION {
+        SELECT ?cpvObject ({{inferred-object-inhibition}} AS ?inScoreModifier)
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?_cpvObject .
+          }
+          GRAPH <http://linked.opendata.cz/resource/concept-scheme/cpv-2008> {
+            {
+              ?_cpvObject skos:broaderTransitive{1,{{query-expansion.hops-to-broader}}} ?cpvObject .
+            } UNION {
+              ?_cpvObject skos:narrowerTransitive{1,{{query-expansion.hops-to-narrower}}} ?cpvObject .
+            }
+          }
+        }
+      }
+    }
+  }
+  GRAPH <{{graph}}> {
+    ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+      pc:lot/pc:awardedTender/pc:bidder ?match . 
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
