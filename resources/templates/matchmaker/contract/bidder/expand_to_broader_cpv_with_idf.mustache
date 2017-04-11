@@ -10,7 +10,7 @@
 SELECT ?match (SUM(?inScoreModifier) AS ?score)
 WHERE {
   {
-    SELECT ?cpv ?inScoreModifier
+    SELECT ?cpvObject ?inScoreModifier
     WHERE {
       {
         SELECT ?cpvObject (1 AS ?inScoreModifier)

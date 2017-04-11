@@ -10,7 +10,7 @@
 SELECT ?match (SUM(?inScoreModifier) AS ?score)
 WHERE {
   {
-    SELECT ?cpv ?inScoreModifier
+    SELECT ?cpvObject ?inScoreModifier
     WHERE {
       {
         SELECT ?cpvObject (1 AS ?inScoreModifier)
@@ -21,7 +21,7 @@ WHERE {
           }
         }
       } UNION {
-        SELECT ?cpv ({{inferred-object-inhibition}} * ?idf AS ?inScoreModifier)
+        SELECT ?cpvObject ({{inferred-object-inhibition}} * ?idf AS ?inScoreModifier)
         WHERE {
           GRAPH <{{graph}}> {
             [] pc:lot <{{contract}}> ;
