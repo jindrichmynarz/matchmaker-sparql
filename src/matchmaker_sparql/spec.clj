@@ -48,6 +48,7 @@
                 :expand-to-narrower-cpv
                 :expand-to-narrower-cpv-with-idf
                 :expand-to-cpv-bidirectional
+                :expand-to-cpv-bidirectional-with-idf
                 :kind
                 :random
                 :service-category
