@@ -58,16 +58,20 @@
 (defn- reduce-data
   "Reduce the available contract awards (`contract-count`)
   by `data-reduction` ratio from (0, 1].
-  Contract awards are moved temporarily into the `withheld-graph`.
+  Contract awards are moved temporarily from `graph` into the `withheld-graph`.
   Withheld contract awards are randomized by splitting their count
   into number of `windows`."
   [{:keys [data-reduction windows]
-    :or {windows 25}} contract-count withheld-graph]
+    :or {windows 25}}
+   contract-count
+   graph
+   withheld-graph]
   (let [splits (get-splits contract-count windows data-reduction)]
     (doseq [{:keys [limit offset]} splits
             :let [update-operation (stencil/render-file "templates/evaluation/setup/reduce_data"
                                                         {:limit limit
                                                          :offset offset
+                                                         :graph graph
                                                          :withheld-graph withheld-graph})]]
       (sparql/update-operation endpoint update-operation))))
 
@@ -117,7 +121,7 @@
     ; Reduce data when required.
     (when data-reduced?
       (timbre/info "Reducing data...")
-      (reduce-data args contract-count))
+      (reduce-data args contract-count graph withheld-graph))
     ; Re-COUNT contracts if data was reduced.
     (let [contract-count' (if data-reduced? (count-awarded-contracts) contract-count)
           bidder-count (count-bidders)
