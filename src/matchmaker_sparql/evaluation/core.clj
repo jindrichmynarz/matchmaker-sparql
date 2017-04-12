@@ -16,4 +16,4 @@
            (->> limits-and-offsets
                 (map (partial fold/run-fold evaluation-params))
                 (metrics/aggregate-evaluation-metrics evaluation-params)))
-         (finally (teardown/teardown-evaluation params)))))
+         (finally (teardown/teardown-evaluation evaluation-params)))))
