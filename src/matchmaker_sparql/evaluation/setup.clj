@@ -66,6 +66,7 @@
    contract-count
    graph
    withheld-graph]
+  (timbre/info "Reducing data...")
   (let [splits (get-splits contract-count windows data-reduction)]
     (doseq [{:keys [limit offset]} splits
             :let [update-operation (stencil/render-file "templates/evaluation/setup/reduce_data"
@@ -120,7 +121,6 @@
       (delete-multiple-awards))
     ; Reduce data when required.
     (when data-reduced?
-      (timbre/info "Reducing data...")
       (reduce-data args contract-count graph withheld-graph))
     ; Re-COUNT contracts if data was reduced.
     (let [contract-count' (if data-reduced? (count-awarded-contracts) contract-count)
