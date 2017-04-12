@@ -2,7 +2,8 @@
   (:require [matchmaker-sparql.endpoint :refer [endpoint]]
             [matchmaker-sparql.config :refer [config]]
             [sparclj.core :as sparql]
-            [stencil.core :as stencil]))
+            [stencil.core :as stencil]
+            [taoensso.timbre :as timbre]))
 
 (defn return-withheld-data
   "Return pc:awardedTender links from `withheld-graph` back to source graph."
@@ -11,6 +12,7 @@
         update-operation (stencil/render-file "templates/evaluation/teardown/return_withheld_data"
                                               {:graph graph
                                                :withheld-graph withheld-graph})]
+    (timbre/info "Returning reduced data...")
     (sparql/update-operation endpoint update-operation)))
 
 (defn teardown-evaluation
