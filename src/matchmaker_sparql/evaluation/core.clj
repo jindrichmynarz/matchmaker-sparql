@@ -9,11 +9,11 @@
 
 (defn run-evaluation
   []
-  (let [params (:evaluation config)]
-    (timbre/info "Starting evaluation...")
-    (try (let [{:keys [limits-and-offsets]
-                :as evaluation-params} (setup/setup-evaluation params)]
-           (->> limits-and-offsets
-                (map (partial fold/run-fold evaluation-params))
-                (metrics/aggregate-evaluation-metrics evaluation-params)))
+  (timbre/info "Starting evaluation...")
+  (let [{:keys [evaluation]} config
+        {:keys [limits-and-offsets]
+         :as evaluation-params} (setup/setup-evaluation evaluation)]
+    (try (->> limits-and-offsets
+              (map (partial fold/run-fold evaluation-params))
+              (metrics/aggregate-evaluation-metrics evaluation-params))
          (finally (teardown/teardown-evaluation evaluation-params)))))
