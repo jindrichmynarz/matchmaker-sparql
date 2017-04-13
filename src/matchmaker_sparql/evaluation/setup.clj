@@ -22,14 +22,14 @@
         update-operation (stencil/render-file template {:graph graph})]
     (sparql/update-operation endpoint update-operation)))
 
-(defn- split-to-ints
+(defn split-to-ints
   "Split `sample-size` into `split-count` of integer-sized splits."
   [sample-size split-count]
   (let [to-increment (mod sample-size split-count)]
     (map-indexed (fn [index size] (if (< index to-increment) (inc size) size))
                  (repeat split-count (int (/ sample-size split-count))))))
 
-(defn- get-splits
+(defn get-splits
   "Split `contract-count` into `split-count` splits, without which
   the `contract-count` = (* `contract-count` `data-reduction`)"
   [contract-count split-count data-reduction]

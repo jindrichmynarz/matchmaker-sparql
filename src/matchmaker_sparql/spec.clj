@@ -67,7 +67,7 @@
 (s/def ::query-expansion (s/keys :opt-un [::hops-to-broader ::hops-to-narrower]))
 
 (s/def ::matchmaker (s/keys :req-un [::kind]
-                            :opt-un [::additional-object-inhibition 
+                            :opt-un [::additional-object-inhibition
                                      ::inferred-object-inhibition ::limit
                                      ::qualifier-inhibition ::query-expansion]))
 

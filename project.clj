@@ -11,7 +11,8 @@
                  [slingshot "0.12.2"]
                  [com.taoensso/timbre "4.8.0"]]
   :main matchmaker-sparql.cli
-  :profiles {:dev {:plugins [[lein-binplus "0.4.2"]]}
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]
+                   :plugins [[lein-binplus "0.4.2"]]}
              :uberjar {:aot :all
                        :uberjar-name "matchmaker_sparql.jar"}}
   :bin {:name "matchmaker_sparql"})
