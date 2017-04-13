@@ -61,11 +61,8 @@
   Contract awards are moved temporarily from `graph` into the `withheld-graph`.
   Withheld contract awards are randomized by splitting their count
   into number of `windows`."
-  [{:keys [data-reduction windows]
-    :or {windows 25}}
-   contract-count
-   graph
-   withheld-graph]
+  [{:keys [contract-count data-reduction graph windows withheld-graph]
+    :or {windows 25}}]
   (timbre/info "Reducing data...")
   (let [splits (get-splits contract-count windows data-reduction)]
     (doseq [{:keys [limit offset]} splits
@@ -107,6 +104,18 @@
          sample-limits
          (conj (butlast (reductions + sample-limits)) 0))))
 
+(defn- are-blank-nodes-present?
+  "Test if there are no blank nodes in data in the evaluated `graph`."
+  [{:keys [graph]}]
+  (let [query (stencil/render-file "templates/evaluation/setup/are_blank_nodes_present" {:graph graph})]
+    (assert (not (sparql/ask-query endpoint query)) "Blank nodes detected!")))
+
+(defn- has-duplicate-tenders?
+  "Test if there are duplicate tenders in data in the evaluated `graph`."
+  [{:keys [graph]}]
+  (let [query (stencil/render-file "templates/evaluation/setup/has_duplicate_tenders" {:graph graph})]
+    (assert (not (sparql/ask-query endpoint query)) "Duplicate tenders detected!")))
+
 (defn setup-evaluation
   "Setup data for evaluation."
   [{:keys [data-reduction folds]
@@ -115,22 +124,25 @@
         withheld-graph (str graph "/withheld")
         evaluation-graph (str graph "/evaluation")
         contract-count (count-awarded-contracts)
-        data-reduced? (and data-reduction (< data-reduction 1))]
+        data-reduced? (and data-reduction (< data-reduction 1))
+        evaluation (assoc args
+                          :contract-count contract-count
+                          :data-reduced? data-reduced?
+                          :evaluation-graph evaluation-graph
+                          :graph graph
+                          :withheld-graph withheld-graph)]
+    (are-blank-nodes-present? evaluation)
+    (has-duplicate-tenders? evaluation)
     (when (has-contracts-with-multiple-winners)
       (timbre/info "Deleting contracts with multiple awards...")
       (delete-multiple-awards))
     ; Reduce data when required.
-    (when data-reduced?
-      (reduce-data args contract-count graph withheld-graph))
+    (when data-reduced? (reduce-data evaluation))
     ; Re-COUNT contracts if data was reduced.
     (let [contract-count' (if data-reduced? (count-awarded-contracts) contract-count)
           bidder-count (count-bidders)
           limits-and-offsets (fold-limits-and-offsets folds contract-count')]
-      (assoc args
+      (assoc evaluation
              :bidder-count bidder-count
              :contract-count contract-count'
-             :data-reduced? data-reduced?
-             :evaluation-graph evaluation-graph
-             :graph graph
-             :limits-and-offsets limits-and-offsets
-             :withheld-graph withheld-graph))))
+             :limits-and-offsets limits-and-offsets))))

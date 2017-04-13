@@ -1,0 +1,20 @@
+{{!
+@param IRI graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+ASK
+WHERE {
+  {
+    SELECT ?contract ?bidder
+    WHERE {
+      GRAPH <{{graph}}> {
+        ?contract pc:awardedTender ?tender .
+        ?tender pc:bidder ?bidder .
+      }
+    }
+    GROUP BY ?contract ?bidder
+    HAVING (COUNT(DISTINCT ?tender) > 1)
+  }
+}
