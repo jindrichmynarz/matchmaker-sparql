@@ -6,7 +6,7 @@
             [stencil.core :as stencil]
             [taoensso.timbre :as timbre]))
 
-(defn- has-contracts-with-multiple-winners
+(defn- has-contracts-with-multiple-winners?
   "Test if there are contracts awarded to multiple bidders."
   []
   (let [{{:keys [graph]} :data} config
@@ -88,7 +88,7 @@
 
 (defn count-bidders
   []
-  (count-query "templates/evaluation/setup/count_bidders")) 
+  (count-query "templates/evaluation/setup/count_bidders"))
 
 (defn- fold-limits-and-offsets
   "Returns a sequence of limits and offsets delimiting the evaluation folds.
@@ -105,15 +105,17 @@
          (conj (butlast (reductions + sample-limits)) 0))))
 
 (defn- are-blank-nodes-present?
-  "Test if there are no blank nodes in data in the evaluated `graph`."
-  [{:keys [graph]}]
-  (let [query (stencil/render-file "templates/evaluation/setup/are_blank_nodes_present" {:graph graph})]
+  "Test if there are no blank nodes in the evaluated data."
+  []
+  (let [{{:keys [graph]} :data} config
+        query (stencil/render-file "templates/evaluation/setup/are_blank_nodes_present" {:graph graph})]
     (assert (not (sparql/ask-query endpoint query)) "Blank nodes detected!")))
 
 (defn- has-duplicate-tenders?
-  "Test if there are duplicate tenders in data in the evaluated `graph`."
-  [{:keys [graph]}]
-  (let [query (stencil/render-file "templates/evaluation/setup/has_duplicate_tenders" {:graph graph})]
+  "Test if there are duplicate tenders in the evaluated data."
+  []
+  (let [{{:keys [graph]} :data} config
+        query (stencil/render-file "templates/evaluation/setup/has_duplicate_tenders" {:graph graph})]
     (assert (not (sparql/ask-query endpoint query)) "Duplicate tenders detected!")))
 
 (defn setup-evaluation
@@ -131,9 +133,9 @@
                           :evaluation-graph evaluation-graph
                           :graph graph
                           :withheld-graph withheld-graph)]
-    (are-blank-nodes-present? evaluation)
-    (has-duplicate-tenders? evaluation)
-    (when (has-contracts-with-multiple-winners)
+    (are-blank-nodes-present?)
+    (has-duplicate-tenders?)
+    (when (has-contracts-with-multiple-winners?)
       (timbre/info "Deleting contracts with multiple awards...")
       (delete-multiple-awards))
     ; Reduce data when required.
