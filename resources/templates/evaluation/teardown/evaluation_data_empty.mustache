@@ -1,0 +1,10 @@
+{{!
+@param IRI evaluation-graph
+}}
+
+ASK
+WHERE {
+  GRAPH <{{evaluation-graph}}> {
+    [] ?p [] .
+  }
+}
