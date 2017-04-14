@@ -16,6 +16,5 @@
              evaluate-fn (fn [[contract match]]
                            (metrics/compute-metrics match (core/match-contract contract)))]
          (timbre/info "Running evaluation on a fold...")
-         (spit "matches.edn" (pr-str fold))
          (metrics/aggregate-fold-metrics (map-fn evaluate-fn fold)))
        (finally (teardown/return-matches evaluation))))

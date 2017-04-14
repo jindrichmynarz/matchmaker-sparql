@@ -2,24 +2,29 @@
   "Setup a whole evaluation run."
   (:require [matchmaker-sparql.config :refer [config]]
             [matchmaker-sparql.endpoint :refer [endpoint]]
+            [matchmaker-sparql.util :as util]
             [sparclj.core :as sparql]
             [stencil.core :as stencil]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [slingshot.slingshot :refer [throw+]]))
+
+(defn- setup-template
+  "Render setup `template` using `data`."
+  [template data]
+  (stencil/render-file (str "templates/evaluation/setup/" template) data))
 
 (defn- has-contracts-with-multiple-winners?
   "Test if there are contracts awarded to multiple bidders."
   []
   (let [{{:keys [graph]} :data} config
-        template "templates/evaluation/setup/has_contracts_with_multiple_winners"
-        query (stencil/render-file template {:graph graph})]
+        query (setup-template "has_contracts_with_multiple_winners" {:graph graph})]
     (sparql/ask-query endpoint query)))
 
 (defn- delete-multiple-awards
   "Delete contracts awarded to multiple bidders."
   []
   (let [{{:keys [graph]} :data} config
-        template "templates/evaluation/setup/delete_multiple_awards"
-        update-operation (stencil/render-file template {:graph graph})]
+        update-operation (setup-template "delete_multiple_awards" {:graph graph})]
     (sparql/update-operation endpoint update-operation)))
 
 (defn split-to-ints
@@ -66,11 +71,11 @@
   (timbre/info "Reducing data...")
   (let [splits (get-splits contract-count windows data-reduction)]
     (doseq [{:keys [limit offset]} splits
-            :let [update-operation (stencil/render-file "templates/evaluation/setup/reduce_data"
-                                                        {:limit limit
-                                                         :offset offset
-                                                         :graph graph
-                                                         :withheld-graph withheld-graph})]]
+            :let [update-operation (setup-template "reduce_data"
+                                                   {:limit limit
+                                                    :offset offset
+                                                    :graph graph
+                                                    :withheld-graph withheld-graph})]]
       (sparql/update-operation endpoint update-operation))))
 
 (defn- count-query
@@ -104,19 +109,36 @@
          sample-limits
          (conj (butlast (reductions + sample-limits)) 0))))
 
+(defn- assert-query
+  "Assert that the result of the SPARQL ASK query rendered from `template`
+  must satisfy the `assertion` (false? by default)."
+  [template exception & {:keys [assertion] :or {assertion false?}}]
+  (let [{{:keys [graph]} :data} config
+        query (setup-template template {:graph graph})]
+    (when-not (assertion (sparql/ask-query endpoint query))
+      (throw+ exception))))
+
+(defn- data-empty?
+  "Test if the evaluated data is empty."
+  []
+  (assert-query "data_empty" {:type ::util/data-empty} :assertion true?))
+
 (defn- are-blank-nodes-present?
   "Test if there are no blank nodes in the evaluated data."
   []
-  (let [{{:keys [graph]} :data} config
-        query (stencil/render-file "templates/evaluation/setup/are_blank_nodes_present" {:graph graph})]
-    (assert (not (sparql/ask-query endpoint query)) "Blank nodes detected!")))
+  (assert-query "are_blank_nodes_present" {:type ::util/blank-nodes-present}))
 
 (defn- has-duplicate-tenders?
   "Test if there are duplicate tenders in the evaluated data."
   []
-  (let [{{:keys [graph]} :data} config
-        query (stencil/render-file "templates/evaluation/setup/has_duplicate_tenders" {:graph graph})]
-    (assert (not (sparql/ask-query endpoint query)) "Duplicate tenders detected!")))
+  (assert-query "has_duplicate_tenders" {:type ::util/duplicate-tenders}))
+
+(defn- test-data-assumptions
+  "Test assumptions about the evaluated data."
+  []
+  (data-empty?)
+  (are-blank-nodes-present?)
+  (has-duplicate-tenders?))
 
 (defn setup-evaluation
   "Setup data for evaluation."
@@ -133,8 +155,7 @@
                           :evaluation-graph evaluation-graph
                           :graph graph
                           :withheld-graph withheld-graph)]
-    (are-blank-nodes-present?)
-    (has-duplicate-tenders?)
+    (test-data-assumptions)
     (when (has-contracts-with-multiple-winners?)
       (timbre/info "Deleting contracts with multiple awards...")
       (delete-multiple-awards))

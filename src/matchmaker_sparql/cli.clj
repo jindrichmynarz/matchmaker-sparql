@@ -37,14 +37,16 @@
   [params]
   (validate-params params)
   (try+ (mount/start-with-args params)
-        (catch [:type ::util/endpoint-not-found] _
+        (catch [:type ::sparql/endpoint-not-found] _
           (util/die (format "SPARQL endpoint <%s> was not found."
                             (get-in config [:sparql ::sparql/url])))))
-  (let [output (str "results_" (util/uuid) ".edn")]
-    (try+ (spit output (-> (evaluation/run-evaluation)
-                           (assoc :config config)
-                           pr-str)))
-    (timbre/info (format "Evaluation results saved to %s." output))))
+  (try+ (let [output (str "results_" (util/uuid) ".edn")
+              results (evaluation/run-evaluation)]
+          (spit output (pr-str (assoc results :config config)))
+          (timbre/info (format "Evaluation results saved to %s." output)))
+        (catch [:type ::util/data-empty] _ (util/die "Data is empty!"))
+        (catch [:type ::util/blank-nodes-present] _ (util/die "Blank nodes detected!"))
+        (catch [:type ::util/duplicate-tenders] _ (util/die "Duplicate tenders detected!"))))
 
 ; ----- Private vars -----
 
