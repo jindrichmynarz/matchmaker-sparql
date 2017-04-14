@@ -1,5 +1,6 @@
 (ns matchmaker-sparql.util
-  (:require [clojure.string :as string])
+  (:require [clojure.string :as string]
+            [stencil.core :as stencil])
   (:import (java.util UUID)))
 
 (defn- exit
@@ -25,6 +26,19 @@
 
 (def join-lines
   (partial string/join \newline))
+
+(defn- render-template
+  "Render `template` in directory `dir` using `data`."
+  [dir template data]
+  (stencil/render-file (str dir template) data))
+
+(def setup-template
+  "Render setup `template` using `data`."
+  (partial render-template "templates/evaluation/setup/"))
+
+(def teardown-template
+  "Render teardown `template` using `data`."
+  (partial render-template "templates/evaluation/teardown/"))
 
 (defn uuid
   "Generates a random UUID"

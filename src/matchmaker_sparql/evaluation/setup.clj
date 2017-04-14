@@ -2,16 +2,10 @@
   "Setup a whole evaluation run."
   (:require [matchmaker-sparql.config :refer [config]]
             [matchmaker-sparql.endpoint :refer [endpoint]]
-            [matchmaker-sparql.util :as util]
+            [matchmaker-sparql.util :as util :refer [setup-template]]
             [sparclj.core :as sparql]
-            [stencil.core :as stencil]
             [taoensso.timbre :as timbre]
             [slingshot.slingshot :refer [throw+]]))
-
-(defn- setup-template
-  "Render setup `template` using `data`."
-  [template data]
-  (stencil/render-file (str "templates/evaluation/setup/" template) data))
 
 (defn- has-contracts-with-multiple-winners?
   "Test if there are contracts awarded to multiple bidders."
