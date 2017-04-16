@@ -1,6 +1,7 @@
 (ns matchmaker-sparql.core
   (:require [matchmaker-sparql.endpoint :refer [endpoint]]
             [matchmaker-sparql.config :refer [config]]
+            [matchmaker-sparql.util :as util]
             [sparclj.core :as sparql]
             [stencil.core :as stencil]
             [slingshot.slingshot :refer [throw+ try+]]
@@ -40,4 +41,9 @@
             (if (< retries max-retries)
               (do (Thread/sleep (+ (* retries 1000) 1000))
                   (match-contract contract :retries (inc retries)))
+              (throw+ exception)))
+          (catch [:status 500] {:keys [body]
+                                :as exception}
+            (if (string/includes? body "Undefined procedure DB.DBA.IRI_RANK")
+              (throw+ {:type ::util/iri-rank-undefined})
               (throw+ exception))))))
