@@ -54,7 +54,9 @@
                 :service-category
                 :top-page-rank-bidders
                 :top-winning-bidders
-                :additional-object})
+                :additional-object
+                :nace
+                :exact-cpv-and-kind})
 
 (s/def ::limit ::positive-int)
 
@@ -62,13 +64,15 @@
 
 (s/def ::hops-to-narrower ::non-negative-int)
 
+(s/def ::kind-inhibition ::inhibition)
+
 (s/def ::qualifier-inhibition ::inhibition)
 
 (s/def ::query-expansion (s/keys :opt-un [::hops-to-broader ::hops-to-narrower]))
 
 (s/def ::matchmaker (s/keys :req-un [::kind]
-                            :opt-un [::additional-object-inhibition
-                                     ::inferred-object-inhibition ::limit
+                            :opt-un [::additional-object-inhibition ::inferred-object-inhibition
+                                     ::kind-inhibition ::limit
                                      ::qualifier-inhibition ::query-expansion]))
 
 (s/def ::windows ::positive-int)
