@@ -37,6 +37,8 @@
   [params]
   (validate-params params)
   (try+ (mount/start-with-args params)
+        (catch [:type ::util/invalid-config] {:keys [message]}
+          (util/die (format "Invalid configuration:\n %s" message)))
         (catch [:type ::sparql/endpoint-not-found] _
           (util/die (format "SPARQL endpoint <%s> was not found."
                             (get-in config [:sparql ::sparql/url])))))
