@@ -13,7 +13,7 @@
   (str "templates/matchmaker/contract/bidder/" (string/replace (name kind) #"-" "_")))
 
 (defn- match-contract'
-  "Match `contract` to bidders using a `template` rendered with `data`."
+  "Match `contract` to bidders using the `query`."
   [query]
   (map :match (sparql/select-query endpoint query)))
 
