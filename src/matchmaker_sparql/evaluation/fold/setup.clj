@@ -42,5 +42,5 @@
   [evaluation limit-and-offset]
   (timbre/info "Setting up an evaluation fold...")
   (withdraw-matches evaluation limit-and-offset)
-  (are-matches-withdrawn?)
+  (are-matches-withdrawn? evaluation)
   (load-matches evaluation))
