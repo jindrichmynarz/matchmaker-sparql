@@ -64,7 +64,7 @@
 
 (s/def ::hops-to-narrower ::non-negative-int)
 
-(s/def ::kind-inhibition ::inhibition)
+(s/def ::kind-inhibition ::weight)
 
 (s/def ::qualifier-inhibition ::inhibition)
 
