@@ -133,9 +133,8 @@
 (defn- evaluation-data-empty?
   "Test if the evaluation graph is empty before loading it."
   [{:keys [evaluation-graph]}]
-  (assert-query "evaluation_data_empty"
-                {:type ::util/evaluation-data-empty}
-                :data {:evaluation-graph evaluation-graph}))
+  (let [query (setup-template "evaluation_data_empty" {:evaluation-graph evaluation-graph})]
+    (not (sparql/ask-query endpoint query))))
 
 (defn- has-duplicate-tenders?
   "Test if there are duplicate tenders in the evaluated data."
