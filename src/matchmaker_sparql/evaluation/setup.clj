@@ -14,6 +14,12 @@
         query (setup-template "has_contracts_with_multiple_winners" {:graph graph})]
     (sparql/ask-query endpoint query)))
 
+(defn- clear-evaluation-graph
+  "CLEAR GRAPH `evaluation-graph`."
+  [{:keys [evaluation-graph]}]
+  (let [update-operation (setup-template "clear_evaluation_graph" {:evaluation-graph evaluation-graph})]
+    (sparql/update-operation endpoint update-operation)))
+
 (defn- delete-multiple-awards
   "Delete contracts awarded to multiple bidders."
   []
@@ -103,24 +109,33 @@
          sample-limits
          (conj (butlast (reductions + sample-limits)) 0))))
 
-(defn- assert-query
+(defn assert-query
   "Assert that the result of the SPARQL ASK query rendered from `template`
   must satisfy the `assertion` (false? by default)."
-  [template exception & {:keys [assertion] :or {assertion false?}}]
+  [template
+   exception
+   & {:keys [assertion data] :or {assertion false?}}]
   (let [{{:keys [graph]} :data} config
-        query (setup-template template {:graph graph})]
+        query (setup-template template (merge {:graph graph} data))]
     (when-not (assertion (sparql/ask-query endpoint query))
       (throw+ exception))))
-
-(defn- data-empty?
-  "Test if the evaluated data is empty."
-  []
-  (assert-query "data_empty" {:type ::util/data-empty} :assertion true?))
 
 (defn- are-blank-nodes-present?
   "Test if there are no blank nodes in the evaluated data."
   []
   (assert-query "are_blank_nodes_present" {:type ::util/blank-nodes-present}))
+
+(defn- data-empty?
+  "Test if the data is not empty."
+  []
+  (assert-query "data_empty" {:type ::util/data-empty} :assertion true?))
+
+(defn- evaluation-data-empty?
+  "Test if the evaluation graph is empty before loading it."
+  [{:keys [evaluation-graph]}]
+  (assert-query "evaluation_data_empty"
+                {:type ::util/evaluation-data-empty}
+                :data {:evaluation-graph evaluation-graph}))
 
 (defn- has-duplicate-tenders?
   "Test if there are duplicate tenders in the evaluated data."
@@ -150,6 +165,9 @@
                           :graph graph
                           :withheld-graph withheld-graph)]
     (test-data-assumptions)
+    (when-not (evaluation-data-empty? evaluation)
+      (timbre/info "Cleaning non-empty evaluation graph...")
+      (clear-evaluation-graph evaluation))
     (when (has-contracts-with-multiple-winners?)
       (timbre/info "Deleting contracts with multiple awards...")
       (delete-multiple-awards))

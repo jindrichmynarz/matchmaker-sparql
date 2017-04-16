@@ -46,7 +46,8 @@
           (timbre/info (format "Evaluation results saved to %s." output)))
         (catch [:type ::util/data-empty] _ (util/die "Data is empty!"))
         (catch [:type ::util/blank-nodes-present] _ (util/die "Blank nodes detected!"))
-        (catch [:type ::util/duplicate-tenders] _ (util/die "Duplicate tenders detected!"))))
+        (catch [:type ::util/duplicate-tenders] _ (util/die "Duplicate tenders detected!"))
+        (catch [:type ::util/matches-not-withdrawn] _ (util/die "Matches not all withdrawn!"))))
 
 ; ----- Private vars -----
 

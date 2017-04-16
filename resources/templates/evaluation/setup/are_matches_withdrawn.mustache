@@ -1,0 +1,18 @@
+{{!
+@param IRI evaluation-graph
+@param IRI graph
+}}
+
+{{> templates/prefixes.mustache}}
+
+ASK
+WHERE {
+  GRAPH <{{evaluation-graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder . 
+  }
+  GRAPH <{{graph}}> {
+    ?contract pc:awardedTender ?awardedTender .
+    ?awardedTender pc:bidder ?bidder . 
+  }
+}
