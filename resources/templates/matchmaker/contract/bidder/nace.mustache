@@ -1,0 +1,43 @@
+{{!
+@param IRI   contract
+@param IRI   graph
+@param float inferred-object-inhibition
+@param int   limit
+@param int   offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?contractCount * ?inScoreModifier) AS ?score) 
+WHERE {
+  {
+    SELECT ?match
+           ({{inferred-object-inhibition}} AS ?inScoreModifier)
+           (COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject 
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:mainObject/skos:closeMatch ?cpvObject .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+          pc:lot/pc:awardedTender/pc:bidder ?proxy . 
+      }
+      GRAPH <http://linked.opendata.cz/resource/dataset/ares/res> { 
+        ?proxy rov:orgActivity/^rov:orgActivity ?match .
+      }
+    }
+    GROUP BY ?match ?inScoreModifier
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
