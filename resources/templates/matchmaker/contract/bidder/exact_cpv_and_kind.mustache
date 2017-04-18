@@ -11,7 +11,7 @@
 SELECT ?match (SUM(?contractCount) AS ?score) 
 WHERE {
   {
-    SELECT ?match (1 AS ?inScoreModifier) (COUNT(?contract) AS ?contractCount)
+    SELECT ?match (COUNT(?contract) AS ?contractCount)
     WHERE {
       {
         SELECT ?cpvObject
@@ -29,7 +29,7 @@ WHERE {
     }
     GROUP BY ?match ?cpvObject
   } UNION {
-    SELECT ?match ({{kind-inhibition}} AS ?inScoreModifier) (COUNT(?contract) AS ?contractCount)
+    SELECT ?match ({{kind-inhibition}} * COUNT(?contract) AS ?contractCount)
     WHERE {
       {
         SELECT ?kind
