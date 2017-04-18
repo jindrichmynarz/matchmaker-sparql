@@ -56,7 +56,8 @@
                 :top-winning-bidders
                 :additional-object
                 :nace
-                :exact-cpv-and-kind})
+                :exact-cpv-and-kind
+                :exact-cpv-additional-object-kind-and-service-category})
 
 (s/def ::limit ::positive-int)
 
@@ -70,10 +71,13 @@
 
 (s/def ::query-expansion (s/keys :opt-un [::hops-to-broader ::hops-to-narrower]))
 
+(s/def ::service-category-inhibition ::weight)
+
 (s/def ::matchmaker (s/keys :req-un [::kind]
                             :opt-un [::additional-object-inhibition ::inferred-object-inhibition
                                      ::kind-inhibition ::limit
-                                     ::qualifier-inhibition ::query-expansion]))
+                                     ::qualifier-inhibition ::query-expansion
+                                     ::service-category-inhibition]))
 
 (s/def ::windows ::positive-int)
 

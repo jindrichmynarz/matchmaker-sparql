@@ -1,0 +1,80 @@
+{{!
+@param IRI   contract
+@param IRI   graph
+@param map   additional-object-inhibition
+@param float kind-inhibition
+@param float service-category-inhibition
+@param int   limit
+@param int   offset (optional)
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?match (SUM(?contractCount) AS ?score) 
+WHERE {
+  {
+    SELECT ?match (?inScoreInhibition * COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?cpvObject ?inScoreInhibition
+        WHERE {
+          GRAPH <{{graph}}> {
+            VALUES (?cpvProperty ?inScoreInhibition) {
+                   (pc:mainObject 1)
+                   (pc:additionalObject {{additional-object-inhibition.in}})
+            }
+            [] pc:lot <{{contract}}> ;
+              ?cpvProperty [ skos:closeMatch ?cpvObject ] .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?inScoreInhibition ?cpvObject
+  } UNION {
+    SELECT ?match ({{service-category-inhibition}} * COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?serviceCategory
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              isvz:serviceCategory ?serviceCategory .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract isvz:serviceCategory ?serviceCategory ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?serviceCategory
+  } UNION {
+    SELECT ?match ({{kind-inhibition}} * COUNT(?contract) AS ?contractCount)
+    WHERE {
+      {
+        SELECT ?kind
+        WHERE {
+          GRAPH <{{graph}}> {
+            [] pc:lot <{{contract}}> ;
+              pc:kind ?kind .
+          }
+        }
+      }
+      GRAPH <{{graph}}> {
+        ?contract pc:kind ?kind ;
+          pc:lot/pc:awardedTender/pc:bidder ?match . 
+      }
+    }
+    GROUP BY ?match ?kind
+  }
+}
+GROUP BY ?match
+ORDER BY DESC(?score)
+LIMIT {{limit}}
+{{#offset}}
+OFFSET {{offset}}
+{{/offset}}
