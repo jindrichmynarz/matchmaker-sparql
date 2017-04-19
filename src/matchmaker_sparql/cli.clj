@@ -55,7 +55,8 @@
         (catch [:type ::util/matches-not-withdrawn] _
           (util/die "Matches not all withdrawn!"))
         (catch [:type ::util/iri-rank-undefined] _
-          (util/die "You need to setup IRI_RANK in Virtuoso!"))))
+          (util/die "You need to setup IRI_RANK in Virtuoso!")))
+  (shutdown-agents))
 
 ; ----- Private vars -----
 
