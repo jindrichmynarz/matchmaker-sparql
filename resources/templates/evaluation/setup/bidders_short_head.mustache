@@ -1,0 +1,21 @@
+{{!
+@param IRI graph
+@param int limit
+@param int offset
+}}
+
+{{> templates/prefixes.mustache}}
+
+SELECT ?bidder ?count
+WHERE {
+  {
+    SELECT ?bidder (COUNT(?contract) AS ?count)
+    WHERE {
+      ?contract pc:awardedTender/pc:bidder ?bidder .
+    }
+    GROUP BY ?bidder
+    ORDER BY DESC(?count)
+  }
+}
+LIMIT {{limit}}
+OFFSET {{offset}}

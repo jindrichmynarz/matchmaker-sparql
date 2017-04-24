@@ -148,6 +148,22 @@
   (are-blank-nodes-present?)
   (has-duplicate-tenders?))
 
+(defn bidders-short-head
+  "Get a set of the most popular bidders accountable for 20 % of `contract-count`."
+  [contract-count]
+  (let [short-head-count (* contract-count 0.2)
+        query-fn (fn [[limit offset]]
+                   (setup-template "templates/evaluation/setup/bidders_short_head"
+                                   {:limit limit :offset offset}))
+        reduce-fn (fn [{a :count} {bidder :bidder b :count}]
+                    {:bidder bidder :count (+ a b)})
+        in-head? (comp (partial >= short-head-count) :count)]
+    (->> (sparql/select-paged endpoint query-fn)
+         (reductions reduce-fn)
+         (take-while in-head?)
+         (map :bidder)
+         (into #{}))))
+
 (defn setup-evaluation
   "Setup data for evaluation."
   [{:keys [data-reduction folds]
@@ -175,8 +191,10 @@
     ; Re-COUNT contracts if data was reduced.
     (let [contract-count' (if data-reduced? (count-awarded-contracts) contract-count)
           bidder-count (count-bidders)
-          limits-and-offsets (fold-limits-and-offsets folds contract-count')]
+          limits-and-offsets (fold-limits-and-offsets folds contract-count')
+          short-head (bidders-short-head contract-count')]
       (assoc evaluation
              :bidder-count bidder-count
              :contract-count contract-count'
-             :limits-and-offsets limits-and-offsets))))
+             :limits-and-offsets limits-and-offsets
+             :long-tail? (complement short-head)))))
