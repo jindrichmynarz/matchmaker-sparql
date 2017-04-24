@@ -152,8 +152,7 @@
   [contract-count]
   (let [short-head-count (/ contract-count 5)
         query-fn (fn [[limit offset]]
-                   (setup-template "templates/evaluation/setup/bidders_short_head"
-                                   {:limit limit :offset offset}))
+                   (setup-template "bidders_short_head" {:limit limit :offset offset}))
         reduce-fn (fn [{a :count} {bidder :bidder b :count}]
                     {:bidder bidder :count (+ a b)})
         in-head? (comp (partial >= short-head-count) :count)]
