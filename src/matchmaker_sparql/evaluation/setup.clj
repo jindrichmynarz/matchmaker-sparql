@@ -68,7 +68,6 @@
   into number of `windows`."
   [{:keys [contract-count data-reduction graph windows withheld-graph]
     :or {windows 25}}]
-  (timbre/info "Reducing data...")
   (let [splits (get-splits contract-count windows data-reduction)]
     (doseq [{:keys [limit offset]} splits
             :let [update-operation (setup-template "reduce_data"
@@ -149,9 +148,9 @@
   (has-duplicate-tenders?))
 
 (defn bidders-short-head
-  "Get a set of the most popular bidders accountable for 20 % of `contract-count`."
+  "Get a set of the most popular bidders accountable for 1/5 of `contract-count`."
   [contract-count]
-  (let [short-head-count (* contract-count 0.2)
+  (let [short-head-count (/ contract-count 5)
         query-fn (fn [[limit offset]]
                    (setup-template "templates/evaluation/setup/bidders_short_head"
                                    {:limit limit :offset offset}))
@@ -187,7 +186,9 @@
       (timbre/info "Deleting contracts with multiple awards...")
       (delete-multiple-awards))
     ; Reduce data when required.
-    (when data-reduced? (reduce-data evaluation))
+    (when data-reduced?
+      (timbre/info "Reducing data...")
+      (reduce-data evaluation))
     ; Re-COUNT contracts if data was reduced.
     (let [contract-count' (if data-reduced? (count-awarded-contracts) contract-count)
           bidder-count (count-bidders)

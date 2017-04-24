@@ -24,11 +24,11 @@
 
 (defn aggregate-evaluation-metrics
   "Compute aggregate metrics for the whole evaluation."
-  [{:keys [bidder-count contract-count]}
+  [{:keys [bidder-count contract-count long-tail?]}
    metrics]
-  (let [matches (union-matches metrics)]
-    {:catalog-coverage (double (/ (count matches)
-                                  bidder-count))
-     :prediction-coverage (double (/ (count (filter false? (mapcat :empties metrics)))
-                                     contract-count))
+  (let [matches (union-matches metrics)
+        matches-count (count matches)]
+    {:catalog-coverage (/ matches-count bidder-count)
+     :long-tail-percentage (/ (count (filter long-tail? matches)) matches-count)
+     :prediction-coverage (/ (count (filter false? (mapcat :empties metrics))) contract-count)
      :ranks (mapcat :ranks metrics)}))
