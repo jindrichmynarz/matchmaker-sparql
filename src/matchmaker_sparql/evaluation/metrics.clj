@@ -8,12 +8,12 @@
   (let [rank (.indexOf matches match)]
     {:rank (if (not= rank -1) (inc rank) :not-found)
      :empty? (not (seq matches))
-     :matches (set matches)}))
+     :matches (zipmap matches (repeat 1))}))
 
 (defn- union-matches
   "Set union matches."
   [metrics]
-  (transduce (map :matches) union metrics))
+  (transduce (map :matches) (partial merge-with +) metrics))
 
 (defn aggregate-fold-metrics
   "Compute aggregate metrics for an evaluation fold."
@@ -27,8 +27,10 @@
   [{:keys [bidder-count contract-count long-tail?]}
    metrics]
   (let [matches (union-matches metrics)
-        matches-count (count matches)]
-    {:catalog-coverage (/ matches-count bidder-count)
-     :long-tail-percentage (/ (count (filter long-tail? matches)) matches-count)
+        long-tail-matches-count (->> matches
+                                     (filter (comp long-tail? key))
+                                     (transduce (map val) +))]
+    {:catalog-coverage (/ (count matches) bidder-count)
+     :long-tail-percentage (/ long-tail-matches-count contract-count)
      :prediction-coverage (/ (count (filter false? (mapcat :empties metrics))) contract-count)
      :ranks (mapcat :ranks metrics)}))
