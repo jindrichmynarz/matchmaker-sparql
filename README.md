@@ -11,6 +11,7 @@ lein run - --config config.edn
 ```
 
 The configuration must be serialized using [EDN](https://github.com/edn-format/edn).
+A sample configuration file is [here](resources/sample_config.edn).
 
 ## Data preparation
 

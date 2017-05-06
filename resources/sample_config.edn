@@ -1,0 +1,25 @@
+{; Named graph of the public procurement data
+ :data {:graph "http://linked.opendata.cz/resource/dataset/isvz.cz"}
+ ; SPARQL endpoint connection details
+ :endpoint #:sparclj.core{:url "http://localhost:8890/sparql-auth"
+                          :auth ["dba" "dba"]
+                          :max-retries 5
+                          :page-size 1000
+                          :virtuoso? true}
+ ; Evaluation protocol for n-fold cross-validation
+ :evaluation {:data-reduction 1
+              :folds 5
+              :sparclj.core/parallel? true
+              :windows 25}
+ ; Parameters of the matchmaker
+ :matchmaker {:additional-object-inhibition {:in 0.1
+                                             :out 0.1}
+              :inferred-object-inhibition 0.1
+              :kind :exact-cpv
+              :kind-inhibition 1
+              :limit 10
+              :qualifier-inhibition {:in 0.1
+                                     :out 0.1}
+              :query-expansion {:hops-to-broader 0
+                                :hops-to-narrower 1}
+              :service-category-inhibition 1}}
