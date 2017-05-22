@@ -7,26 +7,12 @@
 
 {{> templates/prefixes.mustache}}
 
-SELECT ?match (SUM(?contractCount) AS ?score) 
+SELECT ?match (COUNT(*) AS ?score)
 WHERE {
-  {
-    SELECT ?match (COUNT(?contract) AS ?contractCount)
-    WHERE {
-      {
-        SELECT ?cpvObject
-        WHERE {
-          GRAPH <{{graph}}> {
-            [] pc:lot <{{contract}}> ;
-              pc:mainObject/skos:closeMatch ?cpvObject .
-          }
-        }
-      }
-      GRAPH <{{graph}}> {
-        ?contract pc:mainObject/skos:closeMatch ?cpvObject ;
-          pc:lot/pc:awardedTender/pc:bidder ?match . 
-      }
-    }
-    GROUP BY ?match ?cpvObject
+  GRAPH <{{graph}}> {
+    <{{contract}}> ^pc:lot/pc:mainObject/skos:closeMatch/
+                   ^skos:closeMatch/^pc:mainObject/pc:lot/
+                   pc:awardedTender/pc:bidder ?match .
   }
 }
 GROUP BY ?match
