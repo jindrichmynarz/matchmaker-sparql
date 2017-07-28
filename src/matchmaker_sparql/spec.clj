@@ -57,7 +57,9 @@
                 :additional-object
                 :nace
                 :exact-cpv-and-kind
-                :exact-cpv-additional-object-kind-and-service-category})
+                :exact-cpv-and-service-category
+                :exact-cpv-additional-object-kind-and-service-category
+                :exact-cpv-lukasiewicz})
 
 (s/def ::limit ::positive-int)
 
@@ -66,6 +68,8 @@
 (s/def ::hops-to-narrower ::non-negative-int)
 
 (s/def ::kind-inhibition ::weight)
+
+(s/def ::main-object-inhibition ::weight)
 
 (s/def ::qualifier-inhibition ::inhibition)
 
@@ -76,6 +80,7 @@
 (s/def ::matchmaker (s/keys :req-un [::kind]
                             :opt-un [::additional-object-inhibition ::inferred-object-inhibition
                                      ::kind-inhibition ::limit
+                                     ::main-object-inhibition
                                      ::qualifier-inhibition ::query-expansion
                                      ::service-category-inhibition]))
 
